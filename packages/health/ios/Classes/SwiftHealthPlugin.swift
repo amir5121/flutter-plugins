@@ -123,6 +123,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
     let ELECTRODERMAL_ACTIVITY = "ELECTRODERMAL_ACTIVITY"
     let FORCED_EXPIRATORY_VOLUME = "FORCED_EXPIRATORY_VOLUME"
     let HEART_RATE = "HEART_RATE"
+    let HEART_RATE_BEAT_TO_BEAT = "HEART_RATE_BEAT_TO_BEAT"
     let HEART_RATE_VARIABILITY_SDNN = "HEART_RATE_VARIABILITY_SDNN"
     let HEIGHT = "HEIGHT"
     let INSULIN_DELIVERY = "INSULIN_DELIVERY"
@@ -428,7 +429,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         
         let dateFrom = Date(timeIntervalSince1970: startTime.doubleValue / 1000)
         let dateTo = Date(timeIntervalSince1970: endTime.doubleValue / 1000)
-
+        
         let isManualEntry = recordingMethod == RecordingMethod.manual.rawValue
         let metadata: [String: Any] = [
             HKMetadataKeyWasUserEntered: NSNumber(value: isManualEntry)
@@ -525,7 +526,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         }
         let dateFrom = Date(timeIntervalSince1970: startTime.doubleValue / 1000)
         let dateTo = Date(timeIntervalSince1970: endTime.doubleValue / 1000)
-
+        
         let isManualEntry = recordingMethod == RecordingMethod.manual.rawValue
         let metadata = [
             HKMetadataKeyWasUserEntered: NSNumber(value: isManualEntry)
@@ -570,14 +571,14 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         let dateTo = Date(timeIntervalSince1970: endTime.doubleValue / 1000)
         
         let mealTypeString = mealType ?? "UNKNOWN"
-
+        
         let isManualEntry = recordingMethod == RecordingMethod.manual.rawValue
         
         var metadata = ["HKFoodMeal": mealTypeString, HKMetadataKeyWasUserEntered: NSNumber(value: isManualEntry)] as [String : Any]
         if (name != nil) {
             metadata[HKMetadataKeyFoodType] = "\(name!)"
         }
-
+        
         var nutrition = Set<HKSample>()
         for (key, identifier) in NUTRITION_KEYS {
             let value = arguments[key] as? Double
@@ -646,19 +647,19 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         }
         
         let dateTime = Date(timeIntervalSince1970: endTime.doubleValue / 1000)
-
+        
         let isManualEntry = recordingMethod == RecordingMethod.manual.rawValue
-
+        
         guard let categoryType = HKSampleType.categoryType(forIdentifier: .menstrualFlow) else {
             throw PluginError(message: "Invalid Menstrual Flow Type")
         }
-
+        
         let metadata = [HKMetadataKeyMenstrualCycleStart: isStartOfCycle, HKMetadataKeyWasUserEntered: NSNumber(value: isManualEntry)] as [String : Any]
         
         let sample = HKCategorySample(
             type: categoryType,
-            value: menstrualFlowType.rawValue, 
-            start: dateTime, 
+            value: menstrualFlowType.rawValue,
+            start: dateTime,
             end: dateTime,
             metadata: metadata
         )
@@ -770,6 +771,8 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         let recordingMethodsToFilter = (arguments?["recordingMethodsToFilter"] as? [Int]) ?? []
         let includeManualEntry = !recordingMethodsToFilter.contains(RecordingMethod.manual.rawValue)
         
+        print("dataTypeKeydataTypeKeydataTypeKey \(dataTypeKey)")
+        
         // Convert dates from milliseconds to Date()
         let dateFrom = Date(timeIntervalSince1970: startTime.doubleValue / 1000)
         let dateTo = Date(timeIntervalSince1970: endTime.doubleValue / 1000)
@@ -823,6 +826,63 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                 ]
             ])
             return
+            
+            //        case "HEART_RATE_BEAT_TO_BEAT":
+            //             let sampleType = HKSeriesType.heartbeat()
+            //
+            //                let query = HKSampleQuery(sampleType: sampleType, predicate: predicate, limit: limit, sortDescriptors: [sortDescriptor]) { [weak self] (query, samplesOrNil, error) in
+            //                    guard let samples = samplesOrNil as? [HKHeartbeatSeriesSample], error == nil else {
+            //                        DispatchQueue.main.async {
+            //                            result(FlutterError(code: "HEARTBEAT_QUERY_FAILED", message: "Failed to query heartbeat data", details: error?.localizedDescription))
+            //                        }
+            //                        return
+            //                    }
+            //
+            //                    var beatData = [[String: Any]]()
+            //
+            //                    // Iterate over each heartbeat series sample
+            //                    let dispatchGroup = DispatchGroup()
+            //
+            //                    for sample in samples {
+            //                        dispatchGroup.enter()
+            //                        let heartbeatQuery = HKHeartbeatSeriesQuery(heartbeatSeries: sample) { query, timeSinceSeriesStart, precededByGap, done, error in
+            //                            if let error = error {
+            //                                print("Error retrieving heartbeat data: \(error)")
+            //                                dispatchGroup.leave()
+            //                                return
+            //                            }
+            //
+            //                            // Append each heartbeat interval
+            //                            beatData.append([
+            //                                "uuid": "\(sample.uuid)",
+            //                                "time_since_series_start": timeSinceSeriesStart,
+            //                                "preceded_by_gap": precededByGap,
+            //                                "date_from": Int(sample.startDate.timeIntervalSince1970 * 1000),
+            //                                "date_to": Int(sample.endDate.timeIntervalSince1970 * 1000),
+            //                                "source_id": sample.sourceRevision.source.bundleIdentifier,
+            //                                "source_name": sample.sourceRevision.source.name,
+            //                            ])
+            //
+            //                            if done { dispatchGroup.leave() }
+            //                        }
+            //
+            //                        HKHealthStore().execute(heartbeatQuery)
+            //                    }
+            //
+            //                    dispatchGroup.notify(queue: .main) {
+            //                        result(beatData)
+            //                    }
+            //                let query = HKHeartbeatSeriesQuery(heartbeatSeries: self) {
+            //                            (query, timeSinceSeriesStart, precededByGap, done, error) in
+            //                            if error != nil {
+            //                                fatalError("Error during query: \(String(describing: error))")
+            //                            }
+            //                            details.append("\(round(1000 * timeSinceSeriesStart) / 1000) s")
+            //                            if done == true {
+            //                                completion(details)
+            //                            }
+            //                        }
+            //            return
         default:
             break
         }
@@ -834,12 +894,101 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             predicate = NSCompoundPredicate(type: .and, subpredicates: [predicate, manualPredicate])
         }
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
-        
+        //        if (dataTypeKey == "HEART_RATE_BEAT_TO_BEAT") {
+        //            let sampleType = HKSeriesType.heartbeat()
+        //            print("sampleTypesampleTypesampleType \(sampleType)")
+        //
+        //            let querys = HKSampleQuery(sampleType: sampleType, predicate: predicate, limit: limit, sortDescriptors: [sortDescriptor]) { [weak self] (query, samplesOrNil, error) in
+        //
+        //                print("HKSampleQueryHKSampleQuery--------")
+        //
+        //                guard let samples = samplesOrNil as? [HKHeartbeatSeriesSample], error == nil else {
+        //                    DispatchQueue.main.async {
+        //                        result(FlutterError(code: "HEARTBEAT_QUERY_FAILED", message: "Failed to query heartbeat data", details: error?.localizedDescription))
+        //                    }
+        //                    return
+        //                }
+        //
+        //
+        //                print("OOooooOOoOOoooOOooo \(samples)")
+        //                var beatData = [[String: Any]]()
+        //
+        //                // Iterate over each heartbeat series sample
+        //                let dispatchGroup = DispatchGroup()
+        //
+        //                for sample in samples {
+        //
+        //                    dispatchGroup.enter()
+        //                    let heartbeatQuery = HKHeartbeatSeriesQuery(heartbeatSeries: sample) { query, timeSinceSeriesStart, precededByGap, done, error in
+        //                        if let error = error {
+        //                            print("Error retrieving heartbeat data: \(error)")
+        //                            dispatchGroup.leave()
+        //                            return
+        //                        }
+        //
+        //                        print("uuyuyuyuyuyuy")
+        //                        print([
+        //                            "uuid": "\(sample.uuid)",
+        //                            "time_since_series_start": timeSinceSeriesStart,
+        //                            "preceded_by_gap": precededByGap,
+        //                            "date_from": Int(sample.startDate.timeIntervalSince1970 * 1000),
+        //                            "date_to": Int(sample.endDate.timeIntervalSince1970 * 1000),
+        //                            "source_id": sample.sourceRevision.source.bundleIdentifier,
+        //                            "source_name": sample.sourceRevision.source.name,
+        //                        ])
+        //
+        //                        // Append each heartbeat interval
+        //                        beatData.append([
+        //                            "uuid": "\(sample.uuid)",
+        //                            "time_since_series_start": timeSinceSeriesStart,
+        //                            "preceded_by_gap": precededByGap,
+        //                            "date_from": Int(sample.startDate.timeIntervalSince1970 * 1000),
+        //                            "date_to": Int(sample.endDate.timeIntervalSince1970 * 1000),
+        //                            "source_id": sample.sourceRevision.source.bundleIdentifier,
+        //                            "source_name": sample.sourceRevision.source.name,
+        //                        ])
+        //
+        //                        if done { dispatchGroup.leave() }
+        //                    }
+        //
+        //                    HKHealthStore().execute(heartbeatQuery)
+        //                }
+        //                print("beatDatabeatDatabeatData \(beatData)")
+        //
+        //                dispatchGroup.notify(queue: .main) {
+        //                    DispatchQueue.main.async {
+        //                        result(beatData)
+        //                    }
+        //                }
+        //                //                DispatchQueue.main.async {
+        //                //                    result(beatData)
+        //                //                }
+        //                //                           dispatchGroup.notify(queue: .main) {
+        //                //                               result(beatData)
+        //                //                           }
+        //            }
+        //            HKHealthStore().execute(querys)
+        //
+        //            //            let queryss = HKHeartbeatSeriesQuery(heartbeatSeries: self) {
+        //            //                        (query, timeSinceSeriesStart, precededByGap, done, error) in
+        //            //                        if error != nil {
+        //            //                            fatalError("Error during query: \(String(describing: error))")
+        //            //                        }
+        //            //                        details.append("\(round(1000 * timeSinceSeriesStart) / 1000) s")
+        //            //                        if done == true {
+        //            //                            completion(details)
+        //            //                        }
+        //            //                    }
+        //            //
+        //            //            HKHealthStore().execute(queryss)
+        //        }
         let query = HKSampleQuery(
             sampleType: dataType, predicate: predicate, limit: limit, sortDescriptors: [sortDescriptor]
         ) {
             [self]
             x, samplesOrNil, error in
+            
+//            print("samplesOrNilsamplesOrNil \(samplesOrNil)")
             
             switch samplesOrNil {
             case let (samples as [HKQuantitySample]) as Any:
@@ -852,8 +1001,8 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                         "source_id": sample.sourceRevision.source.bundleIdentifier,
                         "source_name": sample.sourceRevision.source.name,
                         "recording_method": (sample.metadata?[HKMetadataKeyWasUserEntered] as? Bool == true)
-                            ? RecordingMethod.manual.rawValue
-                            : RecordingMethod.automatic.rawValue,
+                        ? RecordingMethod.manual.rawValue
+                        : RecordingMethod.automatic.rawValue,
                         "metadata": dataTypeKey == INSULIN_DELIVERY ? sample.metadata : nil
                     ]
                 }
@@ -973,6 +1122,53 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                 DispatchQueue.main.async {
                     result(dictionaries)
                 }
+            case let (samplesHeartbeatSeriesSample as [HKHeartbeatSeriesSample]) as Any:
+                print("samplesHeartbeatSeriesSamplesamplesHeartbeatSeriesSample")
+                if #available(iOS 14.0, *) {
+                    let dictionaries = samplesHeartbeatSeriesSample.map(fetchBeatToBeatHeartRate)
+                    print("popopopopopopopo \(dictionaries)")
+                    DispatchQueue.main.async {
+                        result(dictionaries)
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        print("Error getting HKHeartbeatSeriesSample - only available on iOS 14.0 and above!")
+                        result(nil)
+                    }
+                }
+                //                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHKHeartbeatSeriesSample")
+                //                var beats: [Double] = []
+                //                let dictionaries = samplesHeartbeatSeriesSample.map { sample -> NSDictionary in
+                //                    let queryss = HKHeartbeatSeriesQuery(heartbeatSeries: sample) {
+                //                        (query, timeSinceSeriesStart, precededByGap, done, error) in
+                //                        if error != nil {
+                //                            fatalError("Error during query: \(String(describing: error))")
+                //                        }
+                //                        beats.append(timeSinceSeriesStart)
+                //                        print("ppppppppppp \(round(1000 * timeSinceSeriesStart) / 1000) s")
+                //                        //                                details.append("\(round(1000 * timeSinceSeriesStart) / 1000) s")
+                //                        //                                if done == true {
+                //                        //                                    completion(details)
+                //                        //                                }
+                //                    }
+                //
+                //                    HKHealthStore().execute(queryss)
+                //
+                //                    print("aaaaAAA \(sample)")
+                //
+                //                    return [
+                //                        "uuid": "\(sample.uuid)",
+                //                        "beats": beats,
+                ////                        "preceded_by_gap": precededByGap,
+                //                        "date_from": Int(sample.startDate.timeIntervalSince1970 * 1000),
+                //                        "date_to": Int(sample.endDate.timeIntervalSince1970 * 1000),
+                //                        "source_id": sample.sourceRevision.source.bundleIdentifier,
+                //                        "source_name": sample.sourceRevision.source.name,
+                //                    ]
+                //                }
+                //                DispatchQueue.main.async {
+                //                    result(dictionaries)
+                //                }
                 
             case let (nutritionSample as [HKCorrelation]) as Any:
                 var foods: [[String: Any?]] = []
@@ -991,8 +1187,8 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                             "source_id": sample.sourceRevision.source.bundleIdentifier,
                             "source_name": sample.sourceRevision.source.name,
                             "recording_method": (sample.metadata?[HKMetadataKeyWasUserEntered] as? Bool == true)
-                                ? RecordingMethod.manual.rawValue
-                                : RecordingMethod.automatic.rawValue
+                            ? RecordingMethod.manual.rawValue
+                            : RecordingMethod.automatic.rawValue
                         ]
                         for sample in samples {
                             if let quantitySample = sample as? HKQuantitySample {
@@ -1057,6 +1253,39 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                 for: HKUnit.count().unitDivided(by: HKUnit.minute())),
             "samplingFrequency": sample.samplingFrequency?.doubleValue(for: HKUnit.hertz()),
             "classification": sample.classification.rawValue,
+            "date_from": Int(sample.startDate.timeIntervalSince1970 * 1000),
+            "date_to": Int(sample.endDate.timeIntervalSince1970 * 1000),
+            "source_id": sample.sourceRevision.source.bundleIdentifier,
+            "source_name": sample.sourceRevision.source.name,
+        ]
+    }
+    
+    @available(iOS 14.0, *)
+    private func fetchBeatToBeatHeartRate(_ sample: HKHeartbeatSeriesSample) -> NSDictionary {
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHKHeartbeatSeriesSample")
+        let semaphore = DispatchSemaphore(value: 0)
+        var beats = [NSDictionary]()
+        let queryss = HKHeartbeatSeriesQuery(heartbeatSeries: sample) {
+            (query, timeSinceSeriesStart, precededByGap, done, error) in
+            
+            if error != nil {
+                fatalError("Error during query: \(String(describing: error))")
+            }
+            beats.append(["start": timeSinceSeriesStart, "preceded_by_gap": precededByGap])
+
+//            print("ppppppppppp \(round(1000 * timeSinceSeriesStart) / 1000) s")
+            if done == true {
+                semaphore.signal()
+            }
+        }
+        
+        HKHealthStore().execute(queryss)
+        
+        semaphore.wait()
+//        print("aaaaAAAbbb \(sample) \(beats)")
+        return [
+            "uuid": "\(sample.uuid)",
+            "beats": beats,
             "date_from": Int(sample.startDate.timeIntervalSince1970 * 1000),
             "date_to": Int(sample.endDate.timeIntervalSince1970 * 1000),
             "source_id": sample.sourceRevision.source.bundleIdentifier,
@@ -1294,6 +1523,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         unitDict[COUNT] = HKUnit.count()
         unitDict[PERCENT] = HKUnit.percent()
         unitDict[BEATS_PER_MINUTE] = HKUnit.init(from: "count/min")
+        unitDict[HEART_RATE_BEAT_TO_BEAT] = HKUnit.init(from: "ms")
         unitDict[RESPIRATIONS_PER_MINUTE] = HKUnit.init(from: "count/min")
         unitDict[MILLIGRAM_PER_DECILITER] = HKUnit.init(from: "mg/dL")
         unitDict[UNKNOWN_UNIT] = HKUnit.init(from: "")
@@ -1554,6 +1784,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             dataQuantityTypesDict[ELECTRODERMAL_ACTIVITY] = HKQuantityType.quantityType(forIdentifier: .electrodermalActivity)!
             dataQuantityTypesDict[FORCED_EXPIRATORY_VOLUME] = HKQuantityType.quantityType(forIdentifier: .forcedExpiratoryVolume1)!
             dataQuantityTypesDict[HEART_RATE] = HKQuantityType.quantityType(forIdentifier: .heartRate)!
+            dataQuantityTypesDict[HEART_RATE_BEAT_TO_BEAT] = HKQuantityType.quantityType(forIdentifier: .heartRate)!
             dataQuantityTypesDict[HEART_RATE_VARIABILITY_SDNN] = HKQuantityType.quantityType(forIdentifier: .heartRateVariabilitySDNN)!
             dataQuantityTypesDict[HEIGHT] = HKQuantityType.quantityType(forIdentifier: .height)!
             dataQuantityTypesDict[RESTING_HEART_RATE] = HKQuantityType.quantityType(forIdentifier: .restingHeartRate)!
@@ -1599,6 +1830,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         
         if #available(iOS 14.0, *) {
             dataTypesDict[ELECTROCARDIOGRAM] = HKSampleType.electrocardiogramType()
+            dataTypesDict[HEART_RATE_BEAT_TO_BEAT] = HKSeriesType.heartbeat()
             
             unitDict[VOLT] = HKUnit.volt()
             unitDict[INCHES_OF_MERCURY] = HKUnit.inchesOfMercury()
@@ -1608,10 +1840,10 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             workoutActivityTypeMap["PICKLEBALL"] = HKWorkoutActivityType.pickleball
             workoutActivityTypeMap["COOLDOWN"] = HKWorkoutActivityType.cooldown
         }
-
+        
         if #available(iOS 16.0, *) {
             dataTypesDict[ATRIAL_FIBRILLATION_BURDEN] = HKQuantityType.quantityType(forIdentifier: .atrialFibrillationBurden)!
-        } 
+        }
         
         // Concatenate heart events, headache and health data types (both may be empty)
         allDataTypes = Set(heartRateEventTypes + healthDataTypes)
@@ -1771,5 +2003,5 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         default:
             return "other"
         }
-   }
+    }
 }

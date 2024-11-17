@@ -20,6 +20,7 @@ const List<HealthDataType> dataTypesIOS = [
   HealthDataType.ELECTRODERMAL_ACTIVITY,
   HealthDataType.FORCED_EXPIRATORY_VOLUME,
   HealthDataType.HEART_RATE,
+  HealthDataType.HEART_RATE_BEAT_TO_BEAT,
   HealthDataType.HEART_RATE_VARIABILITY_SDNN,
   HealthDataType.HEIGHT,
   HealthDataType.RESPIRATORY_RATE,
