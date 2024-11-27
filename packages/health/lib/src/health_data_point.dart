@@ -114,7 +114,7 @@ class HealthDataPoint {
       HealthDataType.AUDIOGRAM =>
         AudiogramHealthValue.fromHealthDataPoint(dataPoint),
       HealthDataType.HEART_RATE_BEAT_TO_BEAT =>
-        AudiogramHealthValue.fromHealthDataPoint(dataPoint),
+        HeartRateBeatToBeatValue.fromHealthDataPoint(dataPoint),
       HealthDataType.WORKOUT =>
         WorkoutHealthValue.fromHealthDataPoint(dataPoint),
       HealthDataType.ELECTROCARDIOGRAM =>

@@ -7,8 +7,10 @@ class HealthValue extends Serializable {
 
   @override
   Function get fromJsonFunction => _$HealthValueFromJson;
+
   factory HealthValue.fromJson(Map<String, dynamic> json) =>
       FromJsonFactory().fromJson<HealthValue>(json);
+
   @override
   Map<String, dynamic> toJson() => _$HealthValueToJson(this);
 }
@@ -34,8 +36,10 @@ class NumericHealthValue extends HealthValue {
 
   @override
   Function get fromJsonFunction => _$NumericHealthValueFromJson;
+
   factory NumericHealthValue.fromJson(Map<String, dynamic> json) =>
       FromJsonFactory().fromJson<NumericHealthValue>(json);
+
   @override
   Map<String, dynamic> toJson() => _$NumericHealthValueToJson(this);
 
@@ -86,8 +90,10 @@ class AudiogramHealthValue extends HealthValue {
 
   @override
   Function get fromJsonFunction => _$AudiogramHealthValueFromJson;
+
   factory AudiogramHealthValue.fromJson(Map<String, dynamic> json) =>
       FromJsonFactory().fromJson<AudiogramHealthValue>(json);
+
   @override
   Map<String, dynamic> toJson() => _$AudiogramHealthValueToJson(this);
 
@@ -101,6 +107,95 @@ class AudiogramHealthValue extends HealthValue {
   @override
   int get hashCode =>
       Object.hash(frequencies, leftEarSensitivities, rightEarSensitivities);
+}
+
+/// A [HealthValue] object for beat to beat reading
+///
+/// Parameters:
+/// * [timeSinceSeriesStart] - array of frequencies of the test
+/// * [precededByGap] threshold in decibel for the left ear
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class HeartRateBeatValue extends HealthValue {
+  /// beat to beat duration distance.
+  double timeSinceSeriesStart;
+
+  bool precededByGap;
+
+  HeartRateBeatValue({
+    required this.timeSinceSeriesStart,
+    required this.precededByGap,
+  });
+
+  /// Create a [HeartRateBeatValue] based on a health data point from native data format.
+  factory HeartRateBeatValue.fromHealthDataPoint(dynamic dataPoint) =>
+      HeartRateBeatValue(
+          timeSinceSeriesStart: dataPoint['timeSinceSeriesStart'] as double,
+          precededByGap: dataPoint['precededByGap'] as bool);
+
+  @override
+  String toString() =>
+      """$runtimeType - timeSinceSeriesStart: ${timeSinceSeriesStart.toString()},
+    precededByGap: ${precededByGap.toString()}""";
+
+  @override
+  Function get fromJsonFunction => _$HeartRateBeatValueFromJson;
+
+  factory HeartRateBeatValue.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<HeartRateBeatValue>(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$HeartRateBeatValueToJson(this);
+
+  @override
+  bool operator ==(Object other) =>
+      other is HeartRateBeatValue &&
+      timeSinceSeriesStart == other.timeSinceSeriesStart &&
+      precededByGap == other.precededByGap;
+
+  @override
+  int get hashCode => Object.hash(timeSinceSeriesStart, precededByGap);
+}
+
+/// A [HealthValue] object for beat to beat reading
+///
+/// Parameters:
+/// * [beats] - array of frequencies of the test
+@JsonSerializable(includeIfNull: false, explicitToJson: true)
+class HeartRateBeatToBeatValue extends HealthValue {
+  /// Array of frequencies of the test.
+  List<HeartRateBeatValue> beats;
+
+  HeartRateBeatToBeatValue({
+    required this.beats,
+  });
+
+  /// Create a [HeartRateBeatToBeatValue] based on a health data point from native data format.
+  factory HeartRateBeatToBeatValue.fromHealthDataPoint(dynamic dataPoint) {
+    return HeartRateBeatToBeatValue(
+      beats: (dataPoint['beats'] as List)
+          .map((dynamic beat) => HeartRateBeatValue.fromHealthDataPoint(beat))
+          .toList(),
+    );
+  }
+
+  @override
+  String toString() => """$runtimeType - beats: ${beats.toString()}""";
+
+  @override
+  Function get fromJsonFunction => _$HeartRateBeatToBeatValueFromJson;
+
+  factory HeartRateBeatToBeatValue.fromJson(Map<String, dynamic> json) =>
+      FromJsonFactory().fromJson<HeartRateBeatToBeatValue>(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$HeartRateBeatToBeatValueToJson(this);
+
+  @override
+  bool operator ==(Object other) =>
+      other is HeartRateBeatToBeatValue && listEquals(beats, other.beats);
+
+  @override
+  int get hashCode => beats.hashCode;
 }
 
 /// A [HealthValue] object for workouts
@@ -180,8 +275,10 @@ class WorkoutHealthValue extends HealthValue {
 
   @override
   Function get fromJsonFunction => _$WorkoutHealthValueFromJson;
+
   factory WorkoutHealthValue.fromJson(Map<String, dynamic> json) =>
       FromJsonFactory().fromJson<WorkoutHealthValue>(json);
+
   @override
   Map<String, dynamic> toJson() => _$WorkoutHealthValueToJson(this);
 
@@ -247,8 +344,10 @@ class ElectrocardiogramHealthValue extends HealthValue {
 
   @override
   Function get fromJsonFunction => _$ElectrocardiogramHealthValueFromJson;
+
   factory ElectrocardiogramHealthValue.fromJson(Map<String, dynamic> json) =>
       FromJsonFactory().fromJson<ElectrocardiogramHealthValue>(json);
+
   @override
   Map<String, dynamic> toJson() => _$ElectrocardiogramHealthValueToJson(this);
 
@@ -305,8 +404,10 @@ class ElectrocardiogramVoltageValue extends HealthValue {
 
   @override
   Function get fromJsonFunction => _$ElectrocardiogramVoltageValueFromJson;
+
   factory ElectrocardiogramVoltageValue.fromJson(Map<String, dynamic> json) =>
       FromJsonFactory().fromJson<ElectrocardiogramVoltageValue>(json);
+
   @override
   Map<String, dynamic> toJson() => _$ElectrocardiogramVoltageValueToJson(this);
 
@@ -354,8 +455,10 @@ class InsulinDeliveryHealthValue extends HealthValue {
 
   @override
   Function get fromJsonFunction => _$InsulinDeliveryHealthValueFromJson;
+
   factory InsulinDeliveryHealthValue.fromJson(Map<String, dynamic> json) =>
       FromJsonFactory().fromJson<InsulinDeliveryHealthValue>(json);
+
   @override
   Map<String, dynamic> toJson() => _$InsulinDeliveryHealthValueToJson(this);
 
@@ -603,8 +706,10 @@ class NutritionHealthValue extends HealthValue {
 
   @override
   Function get fromJsonFunction => _$NutritionHealthValueFromJson;
+
   factory NutritionHealthValue.fromJson(Map<String, dynamic> json) =>
       (json) as NutritionHealthValue;
+
   @override
   Map<String, dynamic> toJson() => _$NutritionHealthValueToJson(this);
 

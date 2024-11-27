@@ -286,6 +286,50 @@ Map<String, dynamic> _$AudiogramHealthValueToJson(
   return val;
 }
 
+HeartRateBeatValue _$HeartRateBeatValueFromJson(Map<String, dynamic> json) =>
+    HeartRateBeatValue(
+      timeSinceSeriesStart: (json['timeSinceSeriesStart'] as num).toDouble(),
+      precededByGap: json['precededByGap'] as bool,
+    )..$type = json['__type'] as String?;
+
+Map<String, dynamic> _$HeartRateBeatValueToJson(HeartRateBeatValue instance) {
+  final val = <String, dynamic>{};
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('__type', instance.$type);
+  val['timeSinceSeriesStart'] = instance.timeSinceSeriesStart;
+  val['precededByGap'] = instance.precededByGap;
+  return val;
+}
+
+HeartRateBeatToBeatValue _$HeartRateBeatToBeatValueFromJson(
+        Map<String, dynamic> json) =>
+    HeartRateBeatToBeatValue(
+      beats: (json['beats'] as List<dynamic>)
+          .map((e) => HeartRateBeatValue.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    )..$type = json['__type'] as String?;
+
+Map<String, dynamic> _$HeartRateBeatToBeatValueToJson(
+    HeartRateBeatToBeatValue instance) {
+  final val = <String, dynamic>{};
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('__type', instance.$type);
+  val['beats'] = instance.beats.map((e) => e.toJson()).toList();
+  return val;
+}
+
 WorkoutHealthValue _$WorkoutHealthValueFromJson(Map<String, dynamic> json) =>
     WorkoutHealthValue(
       workoutActivityType: $enumDecode(

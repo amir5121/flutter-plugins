@@ -1271,7 +1271,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             if error != nil {
                 fatalError("Error during query: \(String(describing: error))")
             }
-            beats.append(["start": timeSinceSeriesStart, "preceded_by_gap": precededByGap])
+            beats.append(["timeSinceSeriesStart": timeSinceSeriesStart, "precededByGap": precededByGap])
 
 //            print("ppppppppppp \(round(1000 * timeSinceSeriesStart) / 1000) s")
             if done == true {
